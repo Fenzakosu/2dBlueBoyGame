@@ -13,6 +13,7 @@ public class OBJ_Axe extends Entity{
 		down1 = setup("/objects/axe", gp.TILE_SIZE, gp.TILE_SIZE);
 		attackValue = 2;
 		price = 75;
+		knockbackPower = 10;
 		attackArea.width = 30;
 		attackArea.height = 30;
 		description="[" + name + "]" + "\nA simple axe, \nused most commonly \nfor chopping wood.";

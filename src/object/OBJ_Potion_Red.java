@@ -19,9 +19,10 @@ public class OBJ_Potion_Red extends Entity {
 		price = 150;
 		down1 = setup("/objects/potion_red", gp.TILE_SIZE, gp.TILE_SIZE);
 		description = "[" + name + "]" + "\nRestores your health by " + value + ".";
+		isStackable = true;
 	}
 
-	public void use(Entity entity) {
+	public boolean use(Entity entity) {
 		gp.gameState = gp.dialogueState;
 		gp.ui.currentDialogue = "You drink the " + name + "!\n"
 				+ "Your life has been restored by " + value + " \nhit points!";
@@ -30,5 +31,7 @@ public class OBJ_Potion_Red extends Entity {
 			gp.player.life = gp.player.maxLife;
 		}
 		gp.playSE(2);
+		
+		return true;
 	}
 }

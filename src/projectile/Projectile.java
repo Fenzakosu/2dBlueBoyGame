@@ -30,7 +30,7 @@ public class Projectile extends Entity {
 		if (user == gp.player) {
 			int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
 			if (monsterIndex != 999) {
-				gp.player.damageMonster(monsterIndex, attack);
+				gp.player.damageMonster(monsterIndex, attack,knockbackPower);
 				generateParticle(user.projectile,
 						gp.monsters[gp.currentMap][monsterIndex]);
 				isAlive = false;
@@ -45,6 +45,8 @@ public class Projectile extends Entity {
 				isAlive = false;
 			}
 		}
+		// check collision between projectiles
+		gp.cChecker.checkEntity(gp.projectiles, gp.projectiles);
 
 		switch (direction) {
 		case "up":
@@ -84,5 +86,15 @@ public class Projectile extends Entity {
 	}
 
 	public void subtractResource(Entity user) {
+	}
+
+	public void damageProjectile(int i) {
+
+		if (i != 999) {
+			Entity projectile = gp.projectiles[gp.currentMap][i];
+			projectile.isAlive = false;
+			generateParticle(projectile, projectile);
+		}
+
 	}
 }

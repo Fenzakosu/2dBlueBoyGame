@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 
 import main.GamePanel;
 import object.OBJ_Key;
+import object.OBJ_Potion_Red;
 import object.OBJ_Shield_Wood;
 import object.OBJ_Sword_Normal;
 import projectile.PR_Fireball;
@@ -15,13 +16,11 @@ import utility.KeyHandler;
 public class Player extends Entity {
 
 	KeyHandler keyH;
-
 	int standCounter = 0;
-
 	public final int SCREEN_X;
 	public final int SCREEN_Y;
 	public boolean attackIsCanceled = false;
-	
+	public boolean lightIsUpdated = false;
 
 	public Player(GamePanel gp, KeyHandler keyH) {
 
@@ -50,14 +49,15 @@ public class Player extends Entity {
 	}
 
 	public void setDefaultValues() {
-		// START AT WORLD MAP 
+		// START AT WORLD MAP
 		worldX = gp.TILE_SIZE * 23;
 		worldY = gp.TILE_SIZE * 21;
 		// START IN INTERIOR MAP
 //		worldX = gp.TILE_SIZE * 12;
 //		worldY = gp.TILE_SIZE * 12;
 		name = "Blue Boy";
-		speed = 4;
+		defaultSpeed = 4;
+		speed = defaultSpeed;
 		direction = "down";
 		// PLAYER STATS
 		level = 1;
@@ -90,11 +90,11 @@ public class Player extends Entity {
 	}
 
 	public void setItems() {
-
 		inventory.clear();
 		inventory.add(currentWeapon);
 		inventory.add(currentShield);
 		inventory.add(new OBJ_Key(gp));
+		inventory.add(new OBJ_Potion_Red(gp));
 	}
 
 	public int getAttack() {
@@ -117,6 +117,18 @@ public class Player extends Entity {
 		left2 = setup("/player/boy_left_2", gp.TILE_SIZE, gp.TILE_SIZE);
 		right1 = setup("/player/boy_right_1", gp.TILE_SIZE, gp.TILE_SIZE);
 		right2 = setup("/player/boy_right_2", gp.TILE_SIZE, gp.TILE_SIZE);
+	}
+
+	// TENT IMAGES (WHEN SLEEPING)
+	public void getSleepingImages(BufferedImage image) {
+		up1 = image;
+		up2 = image;
+		down1 = image;
+		down2 = image;
+		left1 = image;
+		left2 = image;
+		right1 = image;
+		right2 = image;
 	}
 
 	// SIZE OF IMAGES : UP , DOWN = 16 X 32
@@ -253,8 +265,15 @@ public class Player extends Entity {
 			projectile.set(worldX, worldY, direction, true, this);
 			// SUBTRACT THE COST (MANA, AMMO ...)
 			projectile.subtractResource(this);
-			// ADD IT TO THE LIST
-			gp.projectileList.add(projectile);
+
+			// CHECK VACANCY
+			for (int i = 0; i < gp.projectiles[1].length; i++) {
+				if (gp.projectiles[gp.currentMap][i] == null) {
+					gp.projectiles[gp.currentMap][i] = projectile;
+					break;
+				}
+			}
+
 			// RESET SHOT COUNTER FOR PLAYER
 			shotCounter = 0;
 			// PLAY FIREBALL SOUND
@@ -322,10 +341,13 @@ public class Player extends Entity {
 			solidArea.height = attackArea.height;
 			// CHECK MONSTER COLLISION WITH THE UPDATED WORLDX, WORLDY AND SOLIDAREA
 			int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
-			damageMonster(monsterIndex, attack);
+			damageMonster(monsterIndex, attack, currentWeapon.knockbackPower);
 
 			int iTileIndex = gp.cChecker.checkEntity(this, gp.iTiles);
 			damageInteractiveTile(iTileIndex);
+
+			int projectileIndex = gp.cChecker.checkEntity(this, gp.projectiles);
+			damageProjectile(projectileIndex);
 
 			// RESTORE ORIGINAL POSITION AND SOLIDAREA
 			worldX = currentWorldX;
@@ -347,12 +369,18 @@ public class Player extends Entity {
 			if (gp.objs[gp.currentMap][i].type == TYPE_PICKUP_ONLY) {
 				gp.objs[gp.currentMap][i].use(this);
 				gp.objs[gp.currentMap][i] = null;
+			}
+			// OBSTACLE
+			else if (gp.objs[gp.currentMap][i].type == TYPE_OBSTACLE) {
+				if (keyH.enterPressed == true) {
+					attackIsCanceled = true;
+					gp.objs[gp.currentMap][i].interact();
+				}
 			} else {
 				// INVENTORY ITEMS
 
 				String text;
-				if (inventory.size() != MAX_INVENTORY_SLOTS) {
-					inventory.add(gp.objs[gp.currentMap][i]);
+				if (canObtainItem(gp.objs[gp.currentMap][i]) == true) {
 					gp.playSE(1);
 					text = "Picked up a " + gp.objs[gp.currentMap][i].name + "!";
 				} else {
@@ -397,11 +425,14 @@ public class Player extends Entity {
 		}
 	}
 
-	public void damageMonster(int i, int attack) {
+	public void damageMonster(int i, int attack, int knockbackPower) {
 		if (i != 999) {
 			if (gp.monsters[gp.currentMap][i].isInvincible == false) {
 
 				gp.playSE(5);
+				if (knockbackPower > 0) {
+					knockback(gp.monsters[gp.currentMap][i], knockbackPower);
+				}
 
 				int damage = attack - gp.monsters[gp.currentMap][i].defense;
 				if (damage < 0) {
@@ -429,6 +460,15 @@ public class Player extends Entity {
 		}
 	}
 
+	public void knockback(Entity entity, int knockbackPower) {
+
+		// SET ENTITY'S DIRECTION TO BE SAME AS PLAYER'S DIRECTION
+		entity.direction = direction;
+
+		entity.speed += knockbackPower;
+		entity.knockbackOn = true;
+	}
+
 	public void damageInteractiveTile(int i) {
 		if (i != 999 && gp.iTiles[gp.currentMap][i].isDestructible == true
 				&& gp.iTiles[gp.currentMap][i].isCorrectItem(this) == true
@@ -447,6 +487,16 @@ public class Player extends Entity {
 						.getDestoyedForm();
 			}
 		}
+	}
+
+	public void damageProjectile(int i) {
+
+		if (i != 999) {
+			Entity projectile = gp.projectiles[gp.currentMap][i];
+			projectile.isAlive = false;
+			generateParticle(projectile, projectile);
+		}
+
 	}
 
 	public void checkLevelUp() {
@@ -470,28 +520,85 @@ public class Player extends Entity {
 	}
 
 	public void selectItem() {
-		int itemIndex = gp.ui.getItemIndexOnSlot(gp.ui.playerSlotCol,gp.ui.playerSlotRow);
+		int itemIndex = gp.ui.getItemIndexOnSlot(gp.ui.playerSlotCol,
+				gp.ui.playerSlotRow);
 
 		if (itemIndex < inventory.size()) {
 
 			Entity selectedItem = inventory.get(itemIndex);
-
+			// WEAPON EQUIP
 			if (selectedItem.type == TYPE_SWORD || selectedItem.type == TYPE_AXE) {
 				currentWeapon = selectedItem;
 				attack = getAttack();
 				getPlayerAttackImages();
 			}
+			// SHIELD EQUIP
 			if (selectedItem.type == TYPE_SHIELD) {
 				currentShield = selectedItem;
 				defense = getDefense();
 			}
-
+			// LIGHT SOURCE EQUIP
+			if (selectedItem.type == TYPE_LIGHT) {
+				if (currentLight == selectedItem) {
+					currentLight = null;
+				} else {
+					currentLight = selectedItem;
+				}
+				lightIsUpdated = true;
+			}
+			// CONSUMABLES
 			if (selectedItem.type == TYPE_CONSUMABLE) {
-				selectedItem.use(this);
-				inventory.remove(itemIndex);
+				if (selectedItem.use(this) == true) {
+					if (selectedItem.amount > 1) {
+						selectedItem.amount--;
+					} else {
+						inventory.remove(itemIndex);
+					}
+				}
 			}
 
 		}
+	}
+
+	// CHECK IF THE SAME ITEM IS ALREADY IN INVENTORY
+	public int searchItemInInventory(String itemName) {
+
+		int itemIndex = 999;
+
+		for (int i = 0; i < inventory.size(); i++) {
+			if (inventory.get(i).name.equals(itemName)) {
+				itemIndex = i;
+				break;
+			}
+		}
+		return itemIndex;
+	}
+
+	public boolean canObtainItem(Entity item) {
+
+		boolean canObtain = false;
+		// CHECK IF STACKABLE
+
+		if (item.isStackable == true) {
+			int index = searchItemInInventory(item.name);
+			if (index != 999) {
+				inventory.get(index).amount++;
+				canObtain = true;
+			} else { // NEW ITEM, SO WE NEED TO CHECK VACANCY
+				if (inventory.size() != MAX_INVENTORY_SLOTS) {
+					inventory.add(item);
+					canObtain = true;
+				}
+			}
+		} else { // NOT STACKABLE, SO CHECK VACANCY
+			if (inventory.size() != MAX_INVENTORY_SLOTS) {
+				inventory.add(item);
+				canObtain = true;
+			}
+		}
+
+		return canObtain;
+
 	}
 
 	public void draw(Graphics2D g2) {

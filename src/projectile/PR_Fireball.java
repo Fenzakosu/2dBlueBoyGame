@@ -19,6 +19,7 @@ public class PR_Fireball extends Projectile {
 		maxLife = 80;
 		life = maxLife;
 		attack = 2;
+		knockbackPower = 0;
 		useCost = 1;
 		isAlive = false;
 		getImages();

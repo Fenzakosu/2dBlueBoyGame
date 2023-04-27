@@ -164,6 +164,84 @@ public class CollisionChecker {
 		return index;
 	}
 
+	// PROJECTILES COLLISION
+	public void checkEntity(Entity[][] targets1, Entity[][] targets2) {
+
+		Entity target1 = null;
+		Entity target2 = null;
+
+		for (int i = 0; i < targets1[1].length; i++) {
+
+			if (targets1[gp.currentMap][i] != null) {
+
+				target1 = targets1[gp.currentMap][i];
+
+				// Get entity's solid area position
+				target1.solidArea.x = target1.worldX + target1.solidArea.x;
+				target1.solidArea.y = target1.worldY + target1.solidArea.y;
+				// Get object's solid area position
+				target1.solidArea.x = target1.worldX + target1.solidArea.x;
+				target1.solidArea.y = target1.worldY + target1.solidArea.y;
+
+				switch (target1.direction) {
+				case "up":
+					target1.solidArea.y -= target1.speed;
+					break;
+				case "down":
+					target1.solidArea.y += target1.speed;
+					break;
+				case "left":
+					target1.solidArea.x -= target1.speed;
+					break;
+				case "right":
+					target1.solidArea.x += target1.speed;
+					break;
+				}
+
+				for (int j = 0; j < targets2[1].length; j++) {
+					if (targets2[gp.currentMap][j] != null) {
+						target2 = targets2[gp.currentMap][j];
+						// Get entity's solid area position
+						target2.solidArea.x = target2.worldX + target2.solidArea.x;
+						target2.solidArea.y = target2.worldY + target2.solidArea.y;
+						// Get object's solid area position
+						target2.solidArea.x = target2.worldX + target2.solidArea.x;
+						target2.solidArea.y = target2.worldY + target2.solidArea.y;
+
+						switch (target2.direction) {
+						case "up":
+							target2.solidArea.y -= target1.speed;
+							break;
+						case "down":
+							target2.solidArea.y += target1.speed;
+							break;
+						case "left":
+							target2.solidArea.x -= target1.speed;
+							break;
+						case "right":
+							target2.solidArea.x += target1.speed;
+							break;
+						}
+
+						if (target1.solidArea.intersects(target2.solidArea)) {
+							if (target2 != target1) {
+								target1.isAlive = false;
+								target1.generateParticle(target1, target2);
+								target2.isAlive = false;
+								target2.generateParticle(target2, target1);
+							}
+						} 
+						target1.solidArea.x = target1.solidAreaDefaultX;
+						target1.solidArea.y = target1.solidAreaDefaultY;
+						target2.solidArea.x = target2.solidAreaDefaultX;
+						target2.solidArea.y = target2.solidAreaDefaultY;
+					}
+				}
+			}
+		}
+
+	}
+
 	public boolean checkPlayer(Entity entity) {
 
 		boolean isTouchingPl = false;

@@ -124,6 +124,10 @@ public class UI {
 		if (gp.gameState == gp.tradeState) {
 			drawTradeScreen();
 		}
+		// SLEEP STATE
+		if (gp.gameState == gp.sleepState) {
+			drawSleepScreen();
+		}
 	}
 
 	public void drawPlayerLife() {
@@ -486,13 +490,33 @@ public class UI {
 
 			// EQUIP CURSOR
 			if (entity.currentWeapon == entity.inventory.get(i)
-					|| entity.currentShield == entity.inventory.get(i)) {
+					|| entity.currentShield == entity.inventory.get(i)
+					|| entity.currentLight == entity.inventory.get(i)) {
 
 				g2.setColor(new Color(240, 190, 90));
 				g2.fillRoundRect(slotX, slotY, gp.TILE_SIZE, gp.TILE_SIZE, 10, 10);
 			}
 
 			g2.drawImage(entity.inventory.get(i).down1, slotX, slotY, null);
+
+			// DISPLAY AMOUNT
+			if (entity == gp.player && entity.inventory.get(i).amount > 1) {
+
+				g2.setFont(g2.getFont().deriveFont(32F));
+				int amountX;
+				int amountY;
+
+				String s = "" + entity.inventory.get(i).amount;
+				amountX = getXforAlignToRightText(s, slotX + 44);
+				amountY = slotY + gp.TILE_SIZE;
+
+				// SHADOW
+				g2.setColor(new Color(60, 60, 60));
+				g2.drawString(s, amountX, amountY);
+				// NUMBER
+				g2.setColor(Color.white);
+				g2.drawString(s, amountX - 3, amountY - 3);
+			}
 
 			slotX += slotSize;
 
@@ -586,7 +610,7 @@ public class UI {
 		g2.setFont(g2.getFont().deriveFont(32F));
 
 		// SUBWINDOW
-		int frameX = gp.TILE_SIZE * 4;
+		int frameX = gp.TILE_SIZE * 6;
 		int frameY = gp.TILE_SIZE;
 		int frameWidth = gp.TILE_SIZE * 8;
 		int frameHeight = gp.TILE_SIZE * 10;
@@ -781,7 +805,7 @@ public class UI {
 
 	public void optionsEndGameConfirmation(int frameX, int frameY) {
 		int textX = frameX + gp.TILE_SIZE;
-		int textY = frameX + gp.TILE_SIZE * 2;
+		int textY = frameY + gp.TILE_SIZE * 2;
 
 		currentDialogue = "Quit the game and \nreturn to the title screen?";
 
@@ -943,19 +967,18 @@ public class UI {
 					gp.gameState = gp.dialogueState;
 					currentDialogue = "You need more coins to buy that!";
 					drawDialogueScreen();
-				} else if (gp.player.inventory
-						.size() == gp.player.MAX_INVENTORY_SLOTS) {
-					subState = 0;
-					gp.gameState = gp.dialogueState;
-					currentDialogue = "You cannot carry any more items!";
-					drawDialogueScreen();
 				} else {
-					gp.player.coin -= npc.inventory.get(itemIndex).price;
-					gp.player.inventory.add(npc.inventory.get(itemIndex));
-					npc.inventory.remove(itemIndex);
+					if (gp.player
+							.canObtainItem(npc.inventory.get(itemIndex)) == true) {
+						gp.player.coin -= npc.inventory.get(itemIndex).price;
+						npc.inventory.remove(itemIndex);
+					} else {
+						subState = 0;
+						gp.gameState = gp.dialogueState;
+						currentDialogue = "You cannot carry any more items!";
+					}
 				}
 			}
-
 		}
 	}
 
@@ -1005,9 +1028,34 @@ public class UI {
 					currentDialogue = "You cannot sell an equipped item!";
 					drawDialogueScreen();
 				} else {
-					gp.player.inventory.remove(itemIndex);
+					if (gp.player.inventory.get(itemIndex).amount > 1) {
+						gp.player.inventory.get(itemIndex).amount--;
+					} else {
+						gp.player.inventory.remove(itemIndex);
+					}
 					gp.player.coin += price;
 				}
+			}
+		}
+	}
+
+	public void drawSleepScreen() {
+		trCounter++;
+		if (trCounter < 120) {
+			gp.envManager.lighting.filterAlpha += 0.01F;
+			if (gp.envManager.lighting.filterAlpha > 1F) {
+				gp.envManager.lighting.filterAlpha = 1F;
+			}
+		}
+		if (trCounter >= 120) {
+			gp.envManager.lighting.filterAlpha -= 0.01F;
+			if (gp.envManager.lighting.filterAlpha <= 0F) {
+				gp.envManager.lighting.filterAlpha = 0F;
+				trCounter = 0;
+				gp.envManager.lighting.dayState = gp.envManager.lighting.DAY;
+				gp.gameState = gp.playState;
+				gp.player.getPlayerImages();
+				gp.envManager.lighting.dayCounter = 0;
 			}
 		}
 	}
