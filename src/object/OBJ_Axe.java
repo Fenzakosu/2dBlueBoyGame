@@ -17,6 +17,8 @@ public class OBJ_Axe extends Entity{
 		attackArea.width = 30;
 		attackArea.height = 30;
 		description="[" + name + "]" + "\nA simple axe, \nused most commonly \nfor chopping wood.";
+		motion1Duration = 20;
+		motion2Duration = 40;
 	}
 
 }

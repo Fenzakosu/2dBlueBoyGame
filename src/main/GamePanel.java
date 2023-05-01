@@ -16,9 +16,11 @@ import javax.swing.JPanel;
 
 import ai.PathFinder;
 import configuration.Config;
+import data.SaveLoad;
 import entity.Entity;
 import entity.Player;
 import environment.EnvironmentManager;
+import map.Map;
 import tile.TileManager;
 import tile_interactive.InteractiveTile;
 import utility.AssetSetter;
@@ -44,8 +46,8 @@ public class GamePanel extends JPanel implements Runnable {
 	public boolean fullscreenOn = false;
 
 	// WORLD SETTINGS
-	public final int MAX_WORLD_COL = 50;
-	public final int MAX_WORLD_ROW = 50;
+	public int maxWorldCol;
+	public int maxWorldRow;
 	public final int MAX_MAP = 20;
 	public int currentMap = 0;
 	// FPS
@@ -63,6 +65,8 @@ public class GamePanel extends JPanel implements Runnable {
 	Config config = new Config(this);
 	public PathFinder pFinder = new PathFinder(this);
 	EnvironmentManager envManager = new EnvironmentManager(this);
+	public Map map = new Map(this);
+	public SaveLoad saveLoad = new SaveLoad(this);
 	Thread gameThread;
 
 	// ENTITIES
@@ -88,6 +92,7 @@ public class GamePanel extends JPanel implements Runnable {
 	public final int transitionState = 7;
 	public final int tradeState = 8;
 	public final int sleepState = 9;
+	public final int mapState = 10;
 
 	public GamePanel() {
 		this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -117,20 +122,19 @@ public class GamePanel extends JPanel implements Runnable {
 
 	}
 
-	public void retry() {
+	public void resetGame(boolean restart) {
 		player.setDefaultPositions();
-		player.restoreLifeAndMana();
+		player.restoreStatus();
 		aSetter.setNPC();
 		aSetter.setMonsters();
-	}
+		player.resetCounters();
 
-	public void restart() {
-		player.setDefaultValues();
-		player.setItems();
-		aSetter.setObjects();
-		aSetter.setNPC();
-		aSetter.setMonsters();
-		aSetter.setInteractiveTiles();
+		if (restart == true) {
+			player.setDefaultValues();
+			aSetter.setInteractiveTiles();
+			aSetter.setObjects();
+			envManager.lighting.resetDay();
+		}
 	}
 
 	public void setFullscreen() {
@@ -237,7 +241,7 @@ public class GamePanel extends JPanel implements Runnable {
 					iTiles[currentMap][i].update();
 				}
 			}
-			// LIGHTING 
+			// LIGHTING
 			envManager.update();
 		}
 		if (gameState == pauseState) {
@@ -258,6 +262,10 @@ public class GamePanel extends JPanel implements Runnable {
 			ui.draw(g2);
 		}
 
+		// MAP SCREEN
+		else if (gameState == mapState) {
+			map.drawFullMapScreen(g2);
+		}
 		// OTHERS
 		else {
 
@@ -323,6 +331,8 @@ public class GamePanel extends JPanel implements Runnable {
 			// ENVIRONMENT EFFECTS (LIGHTNING ...)
 			envManager.draw(g2);
 
+			// MINIMAP
+			map.drawMiniMap(g2);
 			// UI
 			ui.draw(g2);
 		}

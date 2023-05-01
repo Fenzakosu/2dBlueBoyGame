@@ -10,7 +10,7 @@ public class KeyHandler implements KeyListener {
 	GamePanel gp;
 
 	public boolean upPressed, downPressed, leftPressed, rightPressed, enterPressed,
-			shootKeyPressed;
+			shootKeyPressed, spacePressed;
 	// DEBUG
 	public boolean checkDrawTime = false;
 
@@ -59,6 +59,16 @@ public class KeyHandler implements KeyListener {
 		// TRADE STATE
 		else if (gp.gameState == gp.tradeState) {
 			useTradeState(code);
+		}
+		// MAP STATE (MINIMAP)
+		else if (gp.gameState == gp.mapState) {
+			useMapState(code);
+		}
+	}
+
+	public void useMapState(int code) {
+		if (code == KeyEvent.VK_M) {
+			gp.gameState = gp.playState;
 		}
 	}
 
@@ -168,13 +178,13 @@ public class KeyHandler implements KeyListener {
 		if (code == KeyEvent.VK_ENTER) {
 			if (gp.ui.commandNum == 0) {
 				gp.gameState = gp.playState;
-				gp.retry();
+				gp.resetGame(false);
 
 			} else if (gp.ui.commandNum == 1) {
 				gp.gameState = gp.titleState;
 				gp.ui.titleScreenState = 0;
 				gp.stopMusic();
-				gp.restart();
+				gp.resetGame(true);
 			}
 		}
 	}
@@ -262,7 +272,9 @@ public class KeyHandler implements KeyListener {
 					gp.ui.titleScreenState = 1;
 				}
 				if (gp.ui.commandNum == 1) {
-					// TODO: LOAD GAME
+					gp.saveLoad.load();
+					gp.gameState = gp.playState;
+					gp.playMusic(0);
 				}
 				if (gp.ui.commandNum == 2) {
 					System.exit(0);
@@ -335,6 +347,23 @@ public class KeyHandler implements KeyListener {
 		if (code == KeyEvent.VK_ESCAPE) {
 			gp.gameState = gp.optionsState;
 		}
+		if (code == KeyEvent.VK_M) {
+			gp.gameState = gp.mapState;
+		}
+		if (code == KeyEvent.VK_X) {
+			if (gp.map.miniMapOn == false) {
+				gp.map.miniMapOn = true;
+			} else {
+				gp.map.miniMapOn = false;
+			}
+		}
+		if (code == KeyEvent.VK_SPACE) {
+			if (spacePressed == false) {
+				spacePressed = true;
+			} else {
+				spacePressed = false;
+			}
+		}
 		// DEBUG
 		if (code == KeyEvent.VK_T) {
 			if (checkDrawTime == false) {
@@ -395,6 +424,12 @@ public class KeyHandler implements KeyListener {
 		}
 		if (code == KeyEvent.VK_F) {
 			shootKeyPressed = false;
+		}
+		if (code == KeyEvent.VK_ENTER) {
+			enterPressed = false;
+		}
+		if (code == KeyEvent.VK_SPACE) {
+			spacePressed = false;
 		}
 
 	}

@@ -85,6 +85,11 @@ public class Lighting {
 
 	}
 
+	public void resetDay() {
+		dayState = DAY;
+		filterAlpha = 0f;
+	}
+	
 	public void update() {
 
 		if (gp.player.lightIsUpdated == true) {

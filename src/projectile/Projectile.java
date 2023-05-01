@@ -30,7 +30,7 @@ public class Projectile extends Entity {
 		if (user == gp.player) {
 			int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
 			if (monsterIndex != 999) {
-				gp.player.damageMonster(monsterIndex, attack,knockbackPower);
+				gp.player.damageMonster(monsterIndex, this, attack, knockbackPower);
 				generateParticle(user.projectile,
 						gp.monsters[gp.currentMap][monsterIndex]);
 				isAlive = false;
@@ -41,7 +41,7 @@ public class Projectile extends Entity {
 			boolean isTouchingPlayer = gp.cChecker.checkPlayer(this);
 			if (gp.player.isInvincible == false && isTouchingPlayer == true) {
 				damagePlayer(attack);
-				generateParticle(user.projectile, gp.player);
+				generateParticle(user.projectile, user.projectile);
 				isAlive = false;
 			}
 		}

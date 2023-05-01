@@ -14,14 +14,14 @@ public class EventHandler {
 	public EventHandler(GamePanel gp) {
 		this.gp = gp;
 
-		eventRect = new EventRect[gp.MAX_MAP][gp.MAX_WORLD_COL][gp.MAX_WORLD_ROW];
+		eventRect = new EventRect[gp.MAX_MAP][gp.maxWorldCol][gp.maxWorldRow];
 
 		int map = 0;
 		int col = 0;
 		int row = 0;
 
-		while (map < gp.MAX_MAP && col < gp.MAX_WORLD_COL
-				&& row < gp.MAX_WORLD_ROW) {
+		while (map < gp.MAX_MAP && col < gp.maxWorldCol
+				&& row < gp.maxWorldRow) {
 
 			eventRect[map][col][row] = new EventRect();
 
@@ -33,11 +33,11 @@ public class EventHandler {
 			eventRect[map][col][row].eventRectDefaultY = eventRect[map][col][row].y;
 
 			col++;
-			if (col == gp.MAX_WORLD_COL) {
+			if (col == gp.maxWorldCol) {
 				col = 0;
 				row++;
 
-				if (row == gp.MAX_WORLD_ROW) {
+				if (row == gp.maxWorldRow) {
 					row = 0;
 					map++;
 				}
@@ -129,12 +129,16 @@ public class EventHandler {
 			gp.gameState = gameState;
 			gp.player.attackIsCanceled = true;
 			gp.playSE(2);
-			gp.ui.currentDialogue = "You drink water from the pool.\nYour vitality and mana energy \nhave been restored!";
+			gp.ui.currentDialogue = "You drink water from the pool.\nYour vitality and mana energy \nhave been restored!"
+					+ "\n(The progress has been saved.)";
 			gp.player.life = gp.player.maxLife;
 			gp.player.mana = gp.player.maxMana;
 
 			// MONSTERS RESPAWN AFTER DRINKING WATER FROM HEALING POOL
 			gp.aSetter.setMonsters();
+			
+			// SAVE GAME
+			gp.saveLoad.save();
 		}
 	}
 

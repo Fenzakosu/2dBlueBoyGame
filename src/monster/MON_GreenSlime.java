@@ -52,75 +52,26 @@ public class MON_GreenSlime extends Entity {
 		right2 = setup("/monsters/greenslime_down_2", gp.TILE_SIZE, gp.TILE_SIZE);
 	}
 
-	public void update() {
-		super.update();
-
-		int xDistance = Math.abs(worldX - gp.player.worldX);
-		int yDistance = Math.abs(worldY - gp.player.worldY);
-		int tileDistance = (xDistance + yDistance) / gp.TILE_SIZE;
-
-		if (onPath == false && tileDistance < 5) {
-			int i = new Random().nextInt(100) + 1;
-			if (i > 50) {
-				onPath = true;
-			}
-		}
-		if (onPath == true && tileDistance > 20) {
-			onPath = false;
-		}
-	}
-
 	public void setAction() {
 
+//		int xDistance = Math.abs(worldX - gp.player.worldX);
+//		int yDistance = Math.abs(worldY - gp.player.worldY);
+//		int tileDistance = (xDistance + yDistance) / gp.TILE_SIZE;
+
 		if (onPath == true) {
-			// GO TO A POINT
-//			int goalCol = 12;
-//			int goalRow = 9;
-			// FOLLOW PLAYER
-			int goalCol = (gp.player.worldX + gp.player.solidArea.x) / gp.TILE_SIZE;
-			int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.TILE_SIZE;
-			;
 
-			searchPath(goalCol, goalRow);
-			int i = new Random().nextInt(200) + 1;
-			if (i > 197 && projectile.isAlive == false && shotCounter == 30) {
-				projectile.set(worldX, worldY, direction, true, this);
-//				gp.projectileList.add(projectile);
-
-				for (int j = 0; j < gp.projectiles[1].length; j++) {
-					if (gp.projectiles[gp.currentMap][j] == null) {
-						gp.projectiles[gp.currentMap][j] = projectile;
-						break;
-					}
-				}
-
-				shotCounter = 0;
-			}
+			// CHECK IF IT STOPS CHASING (TARGET, DISTANCE, RATE)
+			checkStopChasingOrNot(gp.player, 15, 100);
+			
+			// SEARCH THE DIRECTION TO GO
+			searchPath(getGoalCol(gp.player), getGoalRow(gp.player));
+			// CHECK IF IT SHOOTS A PROJECTILE (RATE, SHOT INTERVAL)
+			checkShootingOrNot(200, 30);
 		} else {
-
-			actionLockCounter++;
-
-			if (actionLockCounter == 120) {
-
-				Random random = new Random();
-				int i = random.nextInt(100) + 1; // pick a number from 1 to 100
-
-				if (i <= 25) {
-					direction = "up";
-				}
-
-				if (i > 25 && i <= 50) {
-					direction = "down";
-				}
-				if (i > 50 && i <= 75) {
-					direction = "left";
-				}
-				if (i > 75 && i <= 100) {
-					direction = "right";
-				}
-				actionLockCounter = 0;
-			}
-
+			// CHECK IF STARTS CHASING (TARGET, DISTANCE, RATE)
+			checkStartChasingOrNot(gp.player, 5, 100);
+			// GET A RANDOM DIRECTION
+			getRandomDirection();
 		}
 	}
 

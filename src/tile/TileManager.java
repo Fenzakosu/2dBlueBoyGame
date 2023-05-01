@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
@@ -18,70 +20,73 @@ public class TileManager {
 	public Tile[] tiles;
 	public int mapTileNums[][][];
 	boolean drawPath = true;
+	ArrayList<String> fileNames = new ArrayList<>();
+	ArrayList<String> collisionStatuses = new ArrayList<>();
 
 	public TileManager(GamePanel gp) {
 		this.gp = gp;
 
-		tiles = new Tile[50];
+		// READ TILE DATA FILE
+		InputStream is = getClass().getResourceAsStream("/maps/tiledata.txt");
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-		mapTileNums = new int[gp.MAX_MAP][gp.MAX_WORLD_COL][gp.MAX_WORLD_ROW];
+		// GETTING TILE NAMES AND COLLISION INFO FROM THE FILE
+		String line;
+
+		try {
+			while ((line = br.readLine()) != null) {
+				fileNames.add(line);
+				collisionStatuses.add(br.readLine());
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// INITIALIZE THE TILE ARRAY BASED ON THE fileNames SIZE
+		tiles = new Tile[fileNames.size()];
 
 		getTileImage();
+		
+		// GET THE MAX_WORLD_COL & MAX_WORLD_ROW
+		is = getClass().getResourceAsStream("/maps/worldmap.txt");
+		br = new BufferedReader(new InputStreamReader(is));
+		
+		try {
+			 String line2= br.readLine();
+			 String maxTile[] = line2.split(" ");
+			 
+			 gp.maxWorldCol = maxTile.length;
+			 gp.maxWorldRow = maxTile.length;
+			 mapTileNums = new int[gp.MAX_MAP][gp.maxWorldCol][gp.maxWorldRow];
+			 br.close();
+		} catch (IOException e) {
+			System.out.println("Exception!");
+		}
+		loadMap("/maps/worldmap.txt", 0);
 
-		loadMap("/maps/worldV3.txt", 0);
-		loadMap("/maps/interior01.txt", 1);
+
 	}
 
 	public void getTileImage() {
 
-		// PLACEHOLDER
-		setup(0, "grass00", false);
-		setup(1, "grass00", false);
-		setup(2, "grass00", false);
-		setup(3, "grass00", false);
-		setup(4, "grass00", false);
-		setup(5, "grass00", false);
-		setup(6, "grass00", false);
-		setup(7, "grass00", false);
-		setup(8, "grass00", false);
-		setup(9, "grass00", false);
-		setup(10, "grass00", false);
-		// PLACEHOLDER
+		// ASSIGNMENT OF TILES BY USING THE EDITOR
+		for (int i = 0; i < fileNames.size(); i++) {
+			String fileName;
+			boolean collision;
 
-		setup(11, "grass01", false);
-		setup(12, "water00", true);
-		setup(13, "water01", true);
-		setup(14, "water02", true);
-		setup(15, "water03", true);
-		setup(16, "water04", true);
-		setup(17, "water05", true);
-		setup(18, "water06", true);
-		setup(19, "water07", true);
-		setup(20, "water08", true);
-		setup(21, "water09", true);
-		setup(22, "water10", true);
-		setup(23, "water11", true);
-		setup(24, "water12", true);
-		setup(25, "water13", true);
-		setup(26, "road00", false);
-		setup(27, "road01", false);
-		setup(28, "road02", false);
-		setup(29, "road03", false);
-		setup(30, "road04", false);
-		setup(31, "road05", false);
-		setup(32, "road06", false);
-		setup(33, "road07", false);
-		setup(34, "road08", false);
-		setup(35, "road09", false);
-		setup(36, "road10", false);
-		setup(37, "road11", false);
-		setup(38, "road12", false);
-		setup(39, "earth", false);
-		setup(40, "wall", true);
-		setup(41, "tree", true);
-		setup(42, "hut", false);
-		setup(43, "floor01", false);
-		setup(44, "table01", true);
+			// GET A FILE NAME
+			fileName = fileNames.get(i);
+
+			// GET A COLLISION STATUS
+			if (collisionStatuses.get(i).equals("true")) {
+				collision = true;
+			} else {
+				collision = false;
+			}
+
+			setup(i, fileName, collision);
+
+		}
 
 	}
 
@@ -91,7 +96,7 @@ public class TileManager {
 		try {
 			tiles[index] = new Tile();
 			tiles[index].image = ImageIO.read(getClass()
-					.getResourceAsStream("/new_tiles/" + imageName + ".png"));
+					.getResourceAsStream("/tiles_editor/" + imageName));
 			tiles[index].image = uTool.scaleImage(tiles[index].image, gp.TILE_SIZE,
 					gp.TILE_SIZE);
 			tiles[index].collision = collision;
@@ -109,16 +114,16 @@ public class TileManager {
 			int col = 0;
 			int row = 0;
 
-			while (col < gp.MAX_WORLD_COL && row < gp.MAX_WORLD_ROW) {
+			while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
 				String line = br.readLine();
 
-				while (col < gp.MAX_WORLD_COL) {
+				while (col < gp.maxWorldCol) {
 					String nums[] = line.split(" ");
 					int num = Integer.parseInt(nums[col]);
 					mapTileNums[map][col][row] = num;
 					col++;
 				}
-				if (col == gp.MAX_WORLD_COL) {
+				if (col == gp.maxWorldCol) {
 					col = 0;
 					row++;
 				}
@@ -135,7 +140,7 @@ public class TileManager {
 		int worldCol = 0;
 		int worldRow = 0;
 
-		while (worldCol < gp.MAX_WORLD_COL && worldRow < gp.MAX_WORLD_ROW) {
+		while (worldCol < gp.maxWorldCol && worldRow < gp.maxWorldRow) {
 
 			int tileNum = mapTileNums[gp.currentMap][worldCol][worldRow];
 
@@ -155,7 +160,7 @@ public class TileManager {
 
 			worldCol++;
 
-			if (worldCol == gp.MAX_WORLD_COL) {
+			if (worldCol == gp.maxWorldCol) {
 				worldCol = 0;
 				worldRow++;
 			}

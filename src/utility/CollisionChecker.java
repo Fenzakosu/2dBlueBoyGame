@@ -28,7 +28,13 @@ public class CollisionChecker {
 
 		int tileNum1, tileNum2;
 
-		switch (entity.direction) {
+		// USE A TEMPORAL DIRECTION WHEN IT'S BEING UNDER KNOCKBACK EFFECT
+		String direction = entity.direction;
+		if (entity.knockbackOn == true) {
+			direction = entity.knockbackDIrection;
+		}
+
+		switch (direction) {
 		case "up":
 			entityTopRow = (entityTopWorldY - entity.speed) / gp.TILE_SIZE;
 			tileNum1 = gp.tileM.mapTileNums[gp.currentMap][entityLeftCol][entityTopRow];
@@ -121,6 +127,12 @@ public class CollisionChecker {
 	public int checkEntity(Entity entity, Entity[][] targets) {
 		int index = 999;
 
+		// USE A TEMPORAL DIRECTION WHEN IT'S BEING UNDER KNOCKBACK EFFECT
+		String direction = entity.direction;
+		if (entity.knockbackOn == true) {
+			direction = entity.knockbackDIrection;
+		}
+
 		for (int i = 0; i < targets[1].length; i++) {
 			if (targets[gp.currentMap][i] != null) {
 
@@ -133,7 +145,7 @@ public class CollisionChecker {
 				targets[gp.currentMap][i].solidArea.y = targets[gp.currentMap][i].worldY
 						+ targets[gp.currentMap][i].solidArea.y;
 
-				switch (entity.direction) {
+				switch (direction) {
 				case "up":
 					entity.solidArea.y -= entity.speed;
 					break;
@@ -230,7 +242,7 @@ public class CollisionChecker {
 								target2.isAlive = false;
 								target2.generateParticle(target2, target1);
 							}
-						} 
+						}
 						target1.solidArea.x = target1.solidAreaDefaultX;
 						target1.solidArea.y = target1.solidAreaDefaultY;
 						target2.solidArea.x = target2.solidAreaDefaultX;
