@@ -9,16 +9,18 @@ public class PR_Fireball extends Projectile {
 
 	GamePanel gp;
 
+	public static final String PR_NAME = "Fireball";
+
 	public PR_Fireball(GamePanel gp) {
 		super(gp);
 
 		this.gp = gp;
 
-		name = "Fireball";
+		name = PR_NAME;
 		speed = 6;
 		maxLife = 80;
 		life = maxLife;
-		attack = 2;
+		attack = 1;
 		knockbackPower = 0;
 		useCost = 1;
 		isAlive = false;
@@ -43,10 +45,11 @@ public class PR_Fireball extends Projectile {
 		}
 		return hasResource;
 	}
-	
+
 	public void subtractResource(Entity user) {
 		user.mana -= useCost;
 	}
+
 	public Color getParticleColor() {
 		Color color = new Color(210, 100, 0);
 		return color;

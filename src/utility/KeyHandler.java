@@ -13,6 +13,7 @@ public class KeyHandler implements KeyListener {
 			shootKeyPressed, spacePressed;
 	// DEBUG
 	public boolean checkDrawTime = false;
+	public boolean godModeOn = false;
 
 	public KeyHandler(GamePanel gp) {
 		this.gp = gp;
@@ -40,8 +41,9 @@ public class KeyHandler implements KeyListener {
 		else if (gp.gameState == gp.pauseState) {
 			usePauseState(code);
 		}
-		// DIALOGUE STATE
-		else if (gp.gameState == gp.dialogueState) {
+		// DIALOGUE OR CUTSCENE STATE
+		else if (gp.gameState == gp.dialogueState
+				|| gp.gameState == gp.cutsceneState) {
 			useDialogueState(code);
 		}
 		// CHARACTER SHEET STATE
@@ -382,6 +384,14 @@ public class KeyHandler implements KeyListener {
 				break;
 			}
 		}
+		// DEBUG
+		if (code == KeyEvent.VK_G) {
+			if (godModeOn == false) {
+				godModeOn = true;
+			} else if (godModeOn == true) {
+				godModeOn = false;
+			}
+		}
 	}
 
 	public void usePauseState(int code) {
@@ -392,7 +402,7 @@ public class KeyHandler implements KeyListener {
 
 	public void useDialogueState(int code) {
 		if (code == KeyEvent.VK_ENTER) {
-			gp.gameState = gp.playState;
+			enterPressed = true;
 		}
 	}
 

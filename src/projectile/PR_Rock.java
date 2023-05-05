@@ -7,13 +7,15 @@ import main.GamePanel;
 
 public class PR_Rock extends Projectile {
 	GamePanel gp;
+	
+	public static final String PR_NAME = "Rock";
 
 	public PR_Rock(GamePanel gp) {
 		super(gp);
 
 		this.gp = gp;
 
-		name = "Rock";
+		name = PR_NAME;
 		speed = 5;
 		maxLife = 80;
 		life = maxLife;

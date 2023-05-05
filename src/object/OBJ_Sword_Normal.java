@@ -5,11 +5,13 @@ import main.GamePanel;
 
 public class OBJ_Sword_Normal extends Entity {
 
+	public static final String OBJ_NAME = "Normal Sword";
+	
 	public OBJ_Sword_Normal(GamePanel gp) {
 		super(gp);
 
 		type = TYPE_SWORD;
-		name = "Normal Sword";
+		name = OBJ_NAME;
 		down1 = setup("/objects/sword_normal", gp.TILE_SIZE, gp.TILE_SIZE);
 		attackValue = 1;
 		price = 50;

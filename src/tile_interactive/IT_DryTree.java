@@ -8,7 +8,8 @@ import main.GamePanel;
 public class IT_DryTree extends InteractiveTile {
 
 	GamePanel gp;
-
+	public static final String IT_NAME = "Dry Tree";
+	
 	public IT_DryTree(GamePanel gp, int col, int row) {
 		super(gp, col, row);
 		this.gp = gp;
@@ -17,6 +18,7 @@ public class IT_DryTree extends InteractiveTile {
 		this.worldY = gp.TILE_SIZE * row;
 		life = 3;
 		down1 = setup("/tiles_interactive/drytree", gp.TILE_SIZE, gp.TILE_SIZE);
+		name = IT_NAME;
 		isDestructible = true;
 	}
 

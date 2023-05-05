@@ -30,7 +30,10 @@ public class Projectile extends Entity {
 		if (user == gp.player) {
 			int monsterIndex = gp.cChecker.checkEntity(this, gp.monsters);
 			if (monsterIndex != 999) {
-				gp.player.damageMonster(monsterIndex, this, attack, knockbackPower);
+				// INCREASED DMG OF PLAYER'S FIREBALL FOR EVERY TWO 
+				// LEVELS (attack * (gp.player.level / 2))
+				gp.player.damageMonster(monsterIndex, this,
+						attack * (gp.player.level / 2), knockbackPower);
 				generateParticle(user.projectile,
 						gp.monsters[gp.currentMap][monsterIndex]);
 				isAlive = false;

@@ -35,7 +35,7 @@ public class Lighting {
 		Graphics2D g2 = (Graphics2D) darknessFilter.getGraphics();
 
 		if (gp.player.currentLight == null) {
-			g2.setColor(new Color(0, 0, 0.1F, 0.9F));
+			g2.setColor(new Color(0, 0, 0.1F, 0.97F));
 		} else {
 			// GET THE CENTER X AND Y OF THE LIGHT CIRCLE
 			int centerX = gp.player.SCREEN_X + gp.TILE_SIZE / 2;
@@ -54,9 +54,9 @@ public class Lighting {
 			color[6] = new Color(0, 0, 0.1F, 0.82F);
 			color[7] = new Color(0, 0, 0.1F, 0.87F);
 			color[8] = new Color(0, 0, 0.1F, 0.91F);
-			color[9] = new Color(0, 0, 0.1F, 0.94F);
-			color[10] = new Color(0, 0, 0.1F, 0.96F);
-			color[11] = new Color(0, 0, 0.1F, 0.97F);
+			color[9] = new Color(0, 0, 0.1F, 0.92F);
+			color[10] = new Color(0, 0, 0.1F, 0.93F);
+			color[11] = new Color(0, 0, 0.1F, 0.94F);
 
 			fraction[0] = 0F;
 			fraction[1] = 0.4F;
@@ -89,7 +89,7 @@ public class Lighting {
 		dayState = DAY;
 		filterAlpha = 0f;
 	}
-	
+
 	public void update() {
 
 		if (gp.player.lightIsUpdated == true) {
@@ -129,9 +129,15 @@ public class Lighting {
 	}
 
 	public void draw(Graphics2D g2) {
-		g2.setComposite(
-				AlphaComposite.getInstance(AlphaComposite.SRC_OVER, filterAlpha));
-		g2.drawImage(darknessFilter, 0, 0, null);
+
+		if (gp.currentArea == gp.AREA_OUTSIDE) {
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+					filterAlpha));
+		}
+		if (gp.currentArea == gp.AREA_OUTSIDE || gp.currentArea == gp.AREA_DUNGEON) {
+			g2.drawImage(darknessFilter, 0, 0, null);
+		}
+
 		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1F));
 
 		// DEBUG

@@ -32,6 +32,8 @@ public class UI {
 	public int subState = 0;
 	public int trCounter = 0; // FOR TRANSITION
 	public Entity npc;
+	int charIndex = 0;
+	String combinedText = "";
 
 	// ROWS AND COLUMNS
 	public int playerSlotCol = 0;
@@ -89,6 +91,7 @@ public class UI {
 		// PLAY STATE
 		if (gp.gameState == gp.playState) {
 			drawPlayerLife();
+			drawMonsterLife();
 			drawMessages();
 		}
 
@@ -135,12 +138,15 @@ public class UI {
 		int x = gp.TILE_SIZE / 2;
 		int y = gp.TILE_SIZE / 2;
 		int i = 0;
+		int lifeIconSize = 32;
+		int manaIconSize = 28;
 
 		// DRAW MAX LIFE
 		while (i < gp.player.maxLife / 2) {
-			g2.drawImage(heart_blank, x, y, null);
+			g2.drawImage(heart_blank, x, y, lifeIconSize, lifeIconSize, null);
 			i++;
-			x += gp.TILE_SIZE;
+			x += lifeIconSize;
+
 		}
 		// RESET
 		x = gp.TILE_SIZE / 2;
@@ -149,13 +155,13 @@ public class UI {
 
 		// DRAW CURRENT LIFE
 		while (i < gp.player.life) {
-			g2.drawImage(heart_half, x, y, null);
+			g2.drawImage(heart_half, x, y, lifeIconSize, lifeIconSize, null);
 			i++;
 			if (i < gp.player.life) {
-				g2.drawImage(heart_full, x, y, null);
+				g2.drawImage(heart_full, x, y, lifeIconSize, lifeIconSize, null);
 			}
 			i++;
-			x += gp.TILE_SIZE;
+			x += lifeIconSize;
 		}
 
 		// DRAW MAX MANA
@@ -163,19 +169,73 @@ public class UI {
 		y = (int) (gp.TILE_SIZE * 1.5);
 		i = 0;
 		while (i < gp.player.maxMana) {
-			g2.drawImage(crystal_blank, x, y, null);
+			g2.drawImage(crystal_blank, x, y, manaIconSize, manaIconSize, null);
 			i++;
-			x += 35;
+			x += manaIconSize;
 		}
 		// RESET
 		x = (gp.TILE_SIZE / 2) - 5;
 		y = (int) (gp.TILE_SIZE * 1.5);
 		i = 0;
 		while (i < gp.player.mana) {
-			g2.drawImage(crystal_full, x, y, null);
+			g2.drawImage(crystal_full, x, y, manaIconSize, manaIconSize, null);
 			i++;
-			x += 35;
+			x += manaIconSize;
 		}
+	}
+
+	public void drawMonsterLife() {
+
+		for (int i = 0; i < gp.monsters[1].length; i++) {
+
+			Entity monster = gp.monsters[gp.currentMap][i];
+
+			if (monster != null && monster.inCamera() == true) {
+				if (monster.hpBarOn == true && monster.isBoss == false) {
+
+					double oneScale = (double) gp.TILE_SIZE / monster.maxLife;
+					double hpBarValue = oneScale * monster.life;
+
+					// OUTILINE OF HEALTH BAR(SLIGHTLY LARGER)
+					g2.setColor(new Color(35, 35, 35));
+					g2.fillRect(monster.getScreenX() - 1, monster.getScreenY() - 16,
+							gp.TILE_SIZE + 2, 12);
+					// HEALTH BAR
+					g2.setColor(new Color(255, 0, 30));
+					g2.fillRect(monster.getScreenX(), monster.getScreenY() - 15,
+							(int) hpBarValue, 10);
+
+					monster.hpBarCounter++;
+
+					if (monster.hpBarCounter > 600) {
+						monster.hpBarCounter = 0;
+						monster.hpBarOn = false;
+					}
+				}
+				// DRAW BOSS MONSTER HEALTH BAR (NO HP BAR COUNTER,
+				// ONCE THE BATTLE STARTS, THE HP BAR IS ALWAYS ON)
+				else if (monster.isBoss == true) {
+					double oneScale = (double) gp.TILE_SIZE * 8 / monster.maxLife;
+					double hpBarValue = oneScale * monster.life;
+
+					int x = gp.SCREEN_WIDTH / 2 - gp.TILE_SIZE * 4;
+					int y = gp.TILE_SIZE * 10;
+
+					// OUTILINE OF BOSS HEALTH BAR(SLIGHTLY LARGER)
+					g2.setColor(new Color(35, 35, 35));
+					g2.fillRect(x - 1, y - 1, gp.TILE_SIZE * 8 + 2, 22);
+					// BOSS HEALTH BAR
+					g2.setColor(new Color(255, 0, 30));
+					g2.fillRect(x, y, (int) hpBarValue, 20);
+
+					g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24F));
+					g2.setColor(Color.white);
+					g2.drawString(monster.name, x + 4, y - 10);
+				}
+			}
+
+		}
+
 	}
 
 	public void drawMessages() {
@@ -336,6 +396,45 @@ public class UI {
 		g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 40F));
 		x += gp.TILE_SIZE;
 		y += gp.TILE_SIZE;
+
+		// CHECKING IF ANY TEXT IS IN THE DIALOGUE ARRAY
+		if (npc.dialogues[npc.dialogueSet][npc.dialogueIndex] != null) {
+
+//			currentDialogue = npc.dialogues[npc.dialogueSet][npc.dialogueIndex];
+
+			char characters[] = npc.dialogues[npc.dialogueSet][npc.dialogueIndex]
+					.toCharArray();
+
+			if (charIndex < characters.length) {
+
+				gp.playSE(17);
+				String s = String.valueOf(characters[charIndex]);
+				combinedText = combinedText + s;
+				currentDialogue = combinedText;
+				charIndex++;
+			}
+
+			if (gp.keyH.enterPressed == true) {
+
+				charIndex = 0;
+				combinedText = "";
+				if (gp.gameState == gp.dialogueState
+						|| gp.gameState == gp.cutsceneState) {
+					npc.dialogueIndex++;
+					gp.keyH.enterPressed = false;
+				}
+			}
+
+		} else { // IF NO TEXT IS IN THE ARRAY
+			npc.dialogueIndex = 0;
+
+			if (gp.gameState == gp.dialogueState) {
+				gp.gameState = gp.playState;
+			}
+			if (gp.gameState == gp.cutsceneState) {
+				gp.csManager.scenePhase++;
+			}
+		}
 
 		for (String line : currentDialogue.split("\n")) {
 			g2.drawString(line, x, y);
@@ -862,6 +961,7 @@ public class UI {
 			gp.player.worldY = gp.TILE_SIZE * gp.eHandler.tempRow;
 			gp.eHandler.previousEventX = gp.player.worldX;
 			gp.eHandler.previousEventY = gp.player.worldY;
+			gp.changeArea();
 		}
 
 	}
@@ -882,6 +982,8 @@ public class UI {
 	}
 
 	public void tradeSelect() {
+
+		npc.dialogueSet = 0;
 		drawDialogueScreen();
 
 		// DRAW SUBWINDOW
@@ -915,8 +1017,7 @@ public class UI {
 			g2.drawString(">", x - gp.TILE_SIZE / 2, y);
 			if (gp.keyH.enterPressed == true) {
 				commandNum = 0;
-				gp.gameState = gp.dialogueState;
-				currentDialogue = "Come again, hehe!";
+				npc.startDialogue(npc, 1);
 			}
 		}
 
@@ -964,18 +1065,14 @@ public class UI {
 			if (gp.keyH.enterPressed == true) {
 				if (npc.inventory.get(itemIndex).price > gp.player.coin) {
 					subState = 0;
-					gp.gameState = gp.dialogueState;
-					currentDialogue = "You need more coins to buy that!";
-					drawDialogueScreen();
+					npc.startDialogue(npc, 2);
 				} else {
 					if (gp.player
 							.canObtainItem(npc.inventory.get(itemIndex)) == true) {
 						gp.player.coin -= npc.inventory.get(itemIndex).price;
-						npc.inventory.remove(itemIndex);
 					} else {
 						subState = 0;
-						gp.gameState = gp.dialogueState;
-						currentDialogue = "You cannot carry any more items!";
+						npc.startDialogue(npc, 3);
 					}
 				}
 			}
@@ -1024,9 +1121,7 @@ public class UI {
 								.get(itemIndex) == gp.player.currentShield) {
 					commandNum = 0;
 					subState = 0;
-					gp.gameState = gp.dialogueState;
-					currentDialogue = "You cannot sell an equipped item!";
-					drawDialogueScreen();
+					npc.startDialogue(npc, 4);
 				} else {
 					if (gp.player.inventory.get(itemIndex).amount > 1) {
 						gp.player.inventory.get(itemIndex).amount--;

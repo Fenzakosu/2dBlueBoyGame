@@ -4,6 +4,7 @@ import main.GamePanel;
 
 public class IT_Trunk extends InteractiveTile {
 	GamePanel gp;
+	public static final String IT_NAME = "Trunk";
 
 	public IT_Trunk(GamePanel gp, int col, int row) {
 		super(gp, col, row);
@@ -13,7 +14,9 @@ public class IT_Trunk extends InteractiveTile {
 		this.worldY = gp.TILE_SIZE * row;
 
 		down1 = setup("/tiles_interactive/trunk", gp.TILE_SIZE, gp.TILE_SIZE);
+		name = IT_NAME;
 
+		// NO COLLISION
 		solidArea.x = 0;
 		solidArea.y = 0;
 		solidArea.width = 0;
@@ -21,6 +24,5 @@ public class IT_Trunk extends InteractiveTile {
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
 	}
-	
-	
+
 }

@@ -19,6 +19,8 @@ public class NPC_OldMan extends Entity {
 		solidAreaDefaultX = solidArea.x;
 		solidAreaDefaultY = solidArea.y;
 
+		dialogueSet = -1;
+
 		getImages();
 		setDialogue();
 	}
@@ -36,10 +38,16 @@ public class NPC_OldMan extends Entity {
 	}
 
 	public void setDialogue() {
-		dialogues[0] = "Greetings to you, lad.";
-		dialogues[1] = "So, you've come to this island hoping \nto find some fine treasure?";
-		dialogues[2] = "I used to be an accomplished mage,\nbut now ... I'm a bit too old for taking \non that kind of adventure.";
-		dialogues[3] = "Well, good luck on your quest! I think \nyou're gonna need it...";
+		dialogues[0][0] = "Greetings to you, lad.";
+		dialogues[0][1] = "So, you've come to this island hoping \nto find some fine treasure?";
+		dialogues[0][2] = "I used to be an accomplished mage,\nbut now ... I'm a bit too old for taking \non that kind of adventure.";
+		dialogues[0][3] = "Well, good luck on your quest! I think \nyou're gonna need it...";
+
+		dialogues[1][0] = "If you become tired , drink \nwater from the pool north of here.";
+		dialogues[1][1] = "However, monsters reappear once you, \ndo that. I have no idea why that happens...";
+		dialogues[1][2] = "In any case, don't push yourself too \n hard!";
+
+		dialogues[2][0] = "I wonder if there is a key for a door to \nthe southwest...";
 	}
 
 	public void setAction() {
@@ -49,9 +57,10 @@ public class NPC_OldMan extends Entity {
 //			int goalCol = 12;
 //			int goalRow = 9;
 			// FOLLOW PLAYER
-			int goalCol = (gp.player.worldX + gp.player.solidArea.x)/ gp.TILE_SIZE;
-			int goalRow = (gp.player.worldY + gp.player.solidArea.y)/ gp.TILE_SIZE;;
-			
+			int goalCol = (gp.player.worldX + gp.player.solidArea.x) / gp.TILE_SIZE;
+			int goalRow = (gp.player.worldY + gp.player.solidArea.y) / gp.TILE_SIZE;
+			;
+
 			searchPath(goalCol, goalRow);
 
 		} else {
@@ -83,8 +92,20 @@ public class NPC_OldMan extends Entity {
 	}
 
 	public void speak() {
-		super.speak();
 
-		onPath = true;
+		facePlayer();
+		startDialogue(this, dialogueSet);
+
+		dialogueSet++;
+
+		if (dialogues[dialogueSet][0] == null) {
+			dialogueSet--;
+		}
+
+//		if (gp.player.life < gp.player.maxLife / 3) {
+//			dialogueSet = 1;
+//		}
+
+//		onPath = true;
 	}
 }

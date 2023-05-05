@@ -7,13 +7,15 @@ public class OBJ_Chest extends Entity {
 
 	GamePanel gp;
 
+	public static final String OBJ_NAME = "Chest";
+
 	public OBJ_Chest(GamePanel gp) {
 
 		super(gp);
 		this.gp = gp;
 
 		type = TYPE_OBSTACLE;
-		name = "Chest";
+		name = OBJ_NAME;
 		image1 = setup("/objects/chest", gp.TILE_SIZE, gp.TILE_SIZE);
 		image2 = setup("/objects/chest_opened", gp.TILE_SIZE, gp.TILE_SIZE);
 		down1 = image1;
@@ -27,32 +29,36 @@ public class OBJ_Chest extends Entity {
 		solidAreaDefaultY = solidArea.y;
 	}
 
+	public void setDialogue() {
+		dialogues[0][0] = "You open a chest and find " + loot.name + "!"
+				+ "\n...But you cannot carry any more!";
+		dialogues[1][0] = "You open a chest and find " + loot.name + "!"
+				+ "\nYou obtain the " + loot.name + "!";
+		dialogues[2][0] = "Chest is empty!";
+	}
+
 	public void setLoot(Entity loot) {
 		this.loot = loot;
+		// WE NEED LOOT INFO BEFORE WE INVOKE SET DIALOGUE METHOD
+		setDialogue();
 	}
 
 	public void interact() {
-
-		gp.gameState = gp.dialogueState;
-
+		// IF CHEST IS NOT OPENED ALREADY , YOU CAN GET ITEM(S) INSIDE IT
 		if (isOpen == false) {
 			gp.playSE(3);
-
-			StringBuilder sb = new StringBuilder();
-			sb.append("You open a chest and find " + loot.name + "!");
-
+			// IF YOUR INVENTORY IS FULL , YOU CANNOT TAKE THE ITEM(S)
 			if (gp.player.canObtainItem(loot) == false) {
-				sb.append("\n...But you cannot carry any more!");
+				startDialogue(this, 0);
 			} else {
-				sb.append("\nYou obtain the " + loot.name + "!");
+				// YOU TAKE ITEM(S) FROM THE CHEST
+				startDialogue(this, 1);
 				down1 = image2;
 				isOpen = true;
 			}
-			gp.ui.currentDialogue = sb.toString();
 		} else {
-			gp.ui.currentDialogue = "Chest is empty!";
+			// CHEST HAS BEEN OPENED ALREADY, HENCE , IT IS EMPTY
+			startDialogue(this, 2);
 		}
-
 	}
-
 }

@@ -27,9 +27,9 @@ public class MON_Orc extends Entity {
 		life = maxLife;
 		attack = 8;
 		defense = 2;
-		expPoints = 10;
+		expPoints = 30;
 		knockbackPower = 5;
-		// GREEN SLIME SOLID AREA
+		// ORC SOLID AREA
 		solidArea.x = 4;
 		solidArea.y = 4;
 		solidArea.width = 40;
@@ -91,7 +91,7 @@ public class MON_Orc extends Entity {
 			// CHECK IF STARTS CHASING (TARGET, DISTANCE, RATE)
 			checkStartChasingOrNot(gp.player, 5, 100);
 			// GET A RANDOM DIRECTION
-			getRandomDirection();
+			getRandomDirection(120);
 
 		}
 		// CHECK IF IT ATTACKS OR NOT

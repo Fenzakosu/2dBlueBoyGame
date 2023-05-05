@@ -28,7 +28,7 @@ public class MON_GreenSlime extends Entity {
 		life = maxLife;
 		attack = 5;
 		defense = 0;
-		expPoints = 4;
+		expPoints = 10;
 		projectile = new PR_Rock(gp);
 		// GREEN SLIME SOLID AREA
 		solidArea.x = 3;
@@ -71,7 +71,7 @@ public class MON_GreenSlime extends Entity {
 			// CHECK IF STARTS CHASING (TARGET, DISTANCE, RATE)
 			checkStartChasingOrNot(gp.player, 5, 100);
 			// GET A RANDOM DIRECTION
-			getRandomDirection();
+			getRandomDirection(120);
 		}
 	}
 

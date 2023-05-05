@@ -33,56 +33,6 @@ public class SaveLoad {
 		this.gp = gp;
 	}
 
-	public Entity getObject(String itemName) {
-		Entity obj = null;
-
-		switch (itemName) {
-		case "Woodcutter's Axe":
-			obj = new OBJ_Axe(gp);
-			break;
-		case "Boots":
-			obj = new OBJ_Boots(gp);
-			break;
-		case "Key":
-			obj = new OBJ_Key(gp);
-			break;
-		case "Lantern":
-			obj = new OBJ_Lantern(gp);
-			break;
-		case "Red Potion":
-			obj = new OBJ_Potion_Red(gp);
-			break;
-		case "Blue Shield":
-			obj = new OBJ_Shield_Blue(gp);
-			break;
-		case "Wood Shield":
-			obj = new OBJ_Shield_Wood(gp);
-			break;
-		case "Normal Sword":
-			obj = new OBJ_Sword_Normal(gp);
-			break;
-		case "Tent":
-			obj = new OBJ_Tent(gp);
-			break;
-		case "Door":
-			obj = new OBJ_Door(gp);
-			break;
-		case "Chest":
-			obj = new OBJ_Chest(gp);
-			break;
-		case "Bronze Coin":
-			obj = new OBJ_Coin_Bronze(gp);
-			break;
-		case "Heart":
-			obj = new OBJ_Heart(gp);
-			break;
-		case "Mana Crystal":
-			obj = new OBJ_ManaCrystal(gp);
-			break;
-		}
-		return obj;
-	}
-
 	public void save() {
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(
@@ -171,7 +121,8 @@ public class SaveLoad {
 			gp.player.inventory.clear();
 
 			for (int i = 0; i < ds.itemNames.size(); i++) {
-				gp.player.inventory.add(getObject(ds.itemNames.get(i)));
+				gp.player.inventory
+						.add(gp.entGenerator.getObject(ds.itemNames.get(i)));
 				gp.player.inventory.get(i).amount = ds.itemAmounts.get(i);
 			}
 
@@ -190,13 +141,14 @@ public class SaveLoad {
 						// NOT AVAILABLE
 						gp.objs[mapNum][i] = null;
 					} else {
-						gp.objs[mapNum][i] = getObject(ds.mapObjectNames[mapNum][i]);
+						gp.objs[mapNum][i] = gp.entGenerator
+								.getObject(ds.mapObjectNames[mapNum][i]);
 						gp.objs[mapNum][i].worldX = ds.mapObjectWorldX[mapNum][i];
 						gp.objs[mapNum][i].worldY = ds.mapObjectWorldY[mapNum][i];
 						if (ds.mapObjectLootNames[mapNum][i] != null) {
 							// ITEMS IN CHEST
-							gp.objs[mapNum][i].loot = getObject(
-									ds.mapObjectLootNames[mapNum][i]);
+							gp.objs[mapNum][i].setLoot(gp.entGenerator
+									.getObject(ds.mapObjectLootNames[mapNum][i]));
 						}
 						gp.objs[mapNum][i].isOpen = ds.mapObjectsOpened[mapNum][i];
 						// IF CHEST IS OPENED , CHANGE IT'S IMAGE

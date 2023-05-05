@@ -7,13 +7,15 @@ public class OBJ_Coin_Bronze extends Entity{
 
 	GamePanel gp;
 	
+	public static final String OBJ_NAME = "Bronze Coin";
+	
 	public OBJ_Coin_Bronze(GamePanel gp) {
 		super(gp);
 		
 		this.gp = gp;
 		
 		type = TYPE_PICKUP_ONLY;
-		name = "Bronze Coin";
+		name = OBJ_NAME;
 		value = 1;
 		down1 = setup("/objects/coin_bronze", gp.TILE_SIZE, gp.TILE_SIZE);
 	}
